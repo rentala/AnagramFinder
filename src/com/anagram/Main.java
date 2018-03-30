@@ -1,5 +1,6 @@
 package com.anagram;
 
+import javax.swing.plaf.synth.SynthEditorPaneUI;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
@@ -12,9 +13,21 @@ public class Main {
 	// write your code here
         System.out.println("Welcome to the Anagram Finder");
         System.out.println("------------------------------");
+        List<String> list = null;
+        try {
+            FileHelper fh = new FileHelper();
+            if (args.length > 0) {
+                list = fh.read(args[0]);
+            } else {
+                System.out.println(" Must contain path to dictionary ");
+                System.exit(0);
+            }
 
-        FileHelper fh = new FileHelper();
-        List<String> list = fh.read("./dictionary.txt");
+        } catch (Exception e) {
+            e.printStackTrace();
+            System.exit(0);
+        }
+
 
         BufferedReader reader = new BufferedReader(new InputStreamReader(System.in));
         System.out.print(" Enter a word : ");
