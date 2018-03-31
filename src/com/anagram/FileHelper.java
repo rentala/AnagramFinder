@@ -1,8 +1,7 @@
 package com.anagram;
-import java.io.BufferedReader;
-import java.io.File;
-import java.io.FileReader;
-import java.io.IOException;
+import java.io.*;
+import java.util.Arrays;
+import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -13,25 +12,94 @@ public class FileHelper {
 
     public List<String> read(String filePath) {
         List<String> list = new LinkedList<>();
-        long start = System.currentTimeMillis();
         try {
             File f = new File(filePath);
             BufferedReader b = new BufferedReader(new FileReader(f));
-
             String line = "";
-
-            System.out.println("Reading file using Buffered Reader");
-
             while ((line = b.readLine()) != null) {
-                //System.out.println(line);
                 list.add(line);
             }
 
         } catch (IOException e) {
             e.printStackTrace();
         }
-        long end = System.currentTimeMillis();
-        System.out.println(" Dictionary loaded in " + (end - start) + " ms \n");
         return list;
+    }
+
+    public List<String> getIndexData(String word) {
+        String dataFile = INDEX_DIR+ "/"+word.charAt(0) + "/"+word+".csv";
+        if(new File(dataFile).exists()) {
+            String line = read(dataFile).get(0);
+            List<String> lines = new LinkedList<>();
+            for(String l :line.split(",")) {
+                lines.add(l);
+            }
+            return lines;
+        }
+        return null;
+
+    }
+    public void writeToDisk(HashMap<String, List<String>> map) throws IOException {
+        // create base index
+        File rootIndex = new File(INDEX_DIR);
+        rootIndex.mkdirs();
+        // mkdir foreach sorted value
+        for(String sortedWord : map.keySet()) {
+            // index alphabetically
+            String indexDir = INDEX_DIR+"/"+sortedWord.charAt(0);
+            File index = new File(indexDir);
+            if (!index.exists())
+                index.mkdirs();
+            // write all anagrams to a data file
+
+            String csvFile = indexDir + "/" +sortedWord + ".csv";
+            FileWriter writer = new FileWriter(csvFile,  true);
+            writeLine(writer, map.get(sortedWord));
+            writer.flush();
+            writer.close();
+        }
+        System.out.println(" Completed writing the map to disk . . ");
+
+    }
+    private static final char DEFAULT_SEPARATOR = ',';
+    private static final String INDEX_DIR = "./index";
+
+    public static void writeLine(Writer w, List<String> values) throws IOException {
+        writeLine(w, values, DEFAULT_SEPARATOR, ' ');
+    }
+    private static String followCVSformat(String value) {
+
+        String result = value;
+        if (result.contains("\"")) {
+            result = result.replace("\"", "\"\"");
+        }
+        return result;
+
+    }
+    public static void writeLine(Writer w, List<String> values, char separators, char customQuote) throws IOException {
+
+        boolean first = true;
+
+        if (separators == ' ') {
+            separators = DEFAULT_SEPARATOR;
+        }
+
+        StringBuilder sb = new StringBuilder();
+        for (String value : values) {
+            if (!first) {
+                sb.append(separators);
+            }
+            if (customQuote == ' ') {
+                sb.append(followCVSformat(value));
+            } else {
+                sb.append(customQuote).append(followCVSformat(value)).append(customQuote);
+            }
+
+            first = false;
+        }
+        sb.append("\n");
+        w.append(sb.toString());
+
+
     }
 }

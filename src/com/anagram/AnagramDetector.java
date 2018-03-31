@@ -1,5 +1,6 @@
 package com.anagram;
 
+import java.io.IOException;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.LinkedList;
@@ -10,15 +11,23 @@ import java.util.List;
  */
 public class AnagramDetector {
     HashMap<String, List<String>> map;
-    public AnagramDetector(List<String> words) {
-        map = new HashMap<>();
+    FileHelper fh = null;
+    boolean saveToDisk;
 
+    public AnagramDetector(List<String> words, boolean saveToDisk) throws IOException {
+        this.saveToDisk = saveToDisk;
+        this.map = new HashMap<>();
+        this.fh = new FileHelper();
         for(String word : words) {
             String sortedWord = sort(word);
             List<String> list = map.containsKey(sortedWord) ? map.get(sortedWord) :
                     new LinkedList<>();
             list.add(word);
             map.put(sortedWord, list);
+        }
+        if (saveToDisk) {
+            System.out.println(" Saving to disk . . ");
+            fh.writeToDisk(map);
         }
     }
     public String sort(String word) {
@@ -27,6 +36,9 @@ public class AnagramDetector {
         return new String(chars);
     }
     public List<String> find(String word) {
-        return map.get(sort(word));
+        if (!saveToDisk)
+            return map.get(sort(word));
+        return fh.getIndexData(sort(word));
+
     }
 }

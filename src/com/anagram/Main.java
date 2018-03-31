@@ -15,7 +15,10 @@ public class Main {
         try {
             FileHelper fh = new FileHelper();
             if (args.length > 0) {
+                long start = System.currentTimeMillis();
                 list = fh.read(args[0]);
+                long end = System.currentTimeMillis();
+                System.out.println(" Dictionary loaded in " + (end - start) + " ms \n");
             } else {
                 System.out.println(" Must contain path to dictionary ");
                 System.exit(0);
@@ -25,14 +28,15 @@ public class Main {
             e.printStackTrace();
             System.exit(0);
         }
-        AnagramDetector ad = new AnagramDetector(list);
+        AnagramDetector ad = new AnagramDetector(list,args.length == 2 );
+
         BufferedReader reader = new BufferedReader(new InputStreamReader(System.in));
         System.out.print(" Enter a word : ");
         String inputWord;
         while(true) {
             inputWord = reader.readLine();
             if(inputWord !=null){
-                if (inputWord.equals("exit")) {
+                if (inputWord.toLowerCase().equals("exit")) {
                     System.out.println(" Good bye ! ");
                     break;
                 }
@@ -41,18 +45,19 @@ public class Main {
                 long end = System.currentTimeMillis();
                 if (res == null || res.size() == 0) {
                     System.out.println(" No anagram found for " + inputWord + " in " + (end - start) + " ms");
-                    System.exit(0);
+                } else {
+                    StringBuilder sb = new StringBuilder();
+                    int ct = 1;
+                    int size = res.size();
+                    System.out.println(" " + size + " anagrams found for " + inputWord + " in " + (end - start) + " ms");
+                    for(String r: res) {
+                        sb.append(r);
+                        if(ct < size) sb.append(',');
+                        ct++;
+                    }
+                    System.out.println(sb.toString());
                 }
-                StringBuilder sb = new StringBuilder();
-                int ct = 1;
-                int size = res.size();
-                System.out.println(size + " anagrams found for " + inputWord + " in " + (end - start) + " ms");
-                for(String r: res) {
-                    sb.append(r);
-                    if(ct < size) sb.append(',');
-                    ct++;
-                }
-                System.out.println(sb.toString());
+
                 System.out.print("\n Enter a word : ");
             }
         }
